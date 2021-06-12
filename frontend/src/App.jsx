@@ -6,10 +6,7 @@ import List from "./components/List";
 
 export default function App() {
   const [showingPending, setShowingPending] = useState(true); // True show pending task, False show completed task
-  const [tasks, setTasks] = useState([
-    {id:uuid(), description:'Something to do', pending:true},
-    {id:uuid(), description:'Something to done', pending:false},
-  ]);
+  const [tasks, setTasks] = useState([ ]);
 
   const toggleTaskList = () => {
     setShowingPending(!showingPending); // Action for toggle list
