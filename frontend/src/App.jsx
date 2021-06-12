@@ -17,11 +17,19 @@ export default function App() {
     return task.pending === showingPending;
   });
 
-  const addTask = (task) => { // Funtion to add task
+  const addTask = (description) => { // Funtion to add task
     setTasks((prevTasks)=>{
-      const newTask = {id:uuid(),description:task,pending:true}
+      const newTask = {id:uuid(),description,pending:true}
       return [...prevTasks, newTask];
     })
+  }
+
+  const toggleTask = (id) => {
+    const updatedTask = [...tasks];
+    const toggledTask = updatedTask.find((task)=> task.id === id );
+    toggledTask.pending = !toggledTask.pending;
+
+    setTasks(updatedTask);
   }
 
   return (
@@ -29,7 +37,7 @@ export default function App() {
       <h1 className="mb-3">To Do List</h1>
       <TaskForm addTask={addTask}/>
       <button className="btn btn-primary mb-3" onClick={toggleTaskList}>{showingPending?'Toggle to completed task':'Toggle to Pending task'}</button>
-      <List tasks={list}/>
+      <List tasks={list} toggleTask={toggleTask}/>
     </div>
   );
 }
