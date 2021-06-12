@@ -3,7 +3,7 @@ import React from 'react'
 export default function ListItem() {
     return (
         <>
-            <li class="list-group-item"><i class="fas fa-check"></i> An item</li>
+            <li className="list-group-item"><i className="fas fa-check"></i> An item</li>
         </>
     )
 }

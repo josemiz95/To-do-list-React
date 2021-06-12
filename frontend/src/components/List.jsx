@@ -6,7 +6,7 @@ import ListItem from './ListItem';
 export default function List() {
     return (
         <>
-            <ul class="list-group">
+            <ul className="list-group">
                 <ListItem />
             </ul>
         </>
