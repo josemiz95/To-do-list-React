@@ -24,7 +24,7 @@ export default function App() {
     })
   }
 
-  const toggleTask = (id) => {
+  const toggleTask = (id) => { // Toggle pending task (True|False)
     const updatedTask = [...tasks];
     const toggledTask = updatedTask.find((task)=> task.id === id );
     toggledTask.pending = !toggledTask.pending;
