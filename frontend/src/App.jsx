@@ -2,6 +2,7 @@ import React, {useState} from "react";
 import { v4 as uuid } from "uuid";
 // Components
 import List from "./components/List";
+import TaskForm from "./components/TaskForm";
 
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
   return (
     <div className="container">
       <h1 className="mb-3">To Do List</h1>
+      <TaskForm />
       <button className="btn btn-primary mb-3" onClick={toggleTaskList}>{showingPending?'Toggle to completed task':'Toggle to Pending task'}</button>
       <List tasks={list}/>
     </div>
