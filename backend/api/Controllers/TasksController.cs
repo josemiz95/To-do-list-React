@@ -23,7 +23,21 @@ namespace api.Controllers
         [HttpGet]
         public IEnumerable<Task> Get()
         {
-            return context.Tasks.ToList();
+            return context.Tasks.ToList(); // Getting list of task
+        }
+
+        [HttpPost]
+        public IActionResult Post([FromBody] Task task)
+        {
+            if (ModelState.IsValid)
+            {
+                context.Tasks.Add(task);
+                context.SaveChanges();
+
+                return Ok(task);
+            }
+
+            return BadRequest(ModelState);
         }
     }
 }
