@@ -43,7 +43,9 @@ namespace api.Controllers
         [HttpPost]
         public IActionResult Post([FromBody] Task task)
         {
-            if (ModelState.IsValid)
+            var taskFind = context.Tasks.FirstOrDefault(t => t.id == task.id); // Find task by id to prevent duplicate key
+
+            if (ModelState.IsValid && taskFind == null)
             {
                 context.Tasks.Add(task); // Add task to Database
                 context.SaveChanges();
@@ -72,7 +74,22 @@ namespace api.Controllers
                 return Ok();
             }
             return BadRequest();
+        }
 
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            var task = context.Tasks.FirstOrDefault(x => x.id == id); // Find task by id to delete
+
+            if (task == null)
+            {
+                return NotFound();
+            }
+
+            context.Tasks.Remove(task); // Deleting from Database
+            context.SaveChanges();
+
+            return Ok(task);
         }
     }
 }
