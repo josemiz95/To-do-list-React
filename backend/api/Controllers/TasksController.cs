@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Task = api.Models.Task;
 
 namespace api.Controllers
 {
@@ -17,6 +18,12 @@ namespace api.Controllers
         public TasksController(ApplicationDbContext context)
         {
             this.context = context; // Setting up the context
+        }
+
+        [HttpGet]
+        public IEnumerable<Task> Get()
+        {
+            return context.Tasks.ToList();
         }
     }
 }
