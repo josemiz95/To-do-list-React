@@ -1,6 +1,7 @@
 ﻿using api.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,13 +45,34 @@ namespace api.Controllers
         {
             if (ModelState.IsValid)
             {
-                context.Tasks.Add(task);
+                context.Tasks.Add(task); // Add task to Database
                 context.SaveChanges();
 
                 return new CreatedAtRouteResult("GetById", new { id = task.id }, task);
             }
 
             return BadRequest(ModelState);
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult Put([FromBody] Task task, int id)
+        {
+            var taskFind = context.Tasks.FirstOrDefault(Task => Task.id == id); // Find task by id
+
+            if (taskFind == null)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid && task.id == id)
+            {
+                context.Entry(task).State = EntityState.Modified; // Modify Task
+                context.SaveChanges();
+
+                return Ok();
+            }
+            return BadRequest();
+
         }
     }
 }
