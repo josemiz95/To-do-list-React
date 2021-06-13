@@ -26,6 +26,19 @@ namespace api.Controllers
             return context.Tasks.ToList(); // Getting list of task
         }
 
+        [HttpGet("{id}", Name = "GetById")]
+        public IActionResult GetById(int id)
+        {
+            var task = context.Tasks.FirstOrDefault(Task => Task.id == id); // Find task by id
+
+            if (task == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(task);
+        }
+
         [HttpPost]
         public IActionResult Post([FromBody] Task task)
         {
@@ -34,7 +47,7 @@ namespace api.Controllers
                 context.Tasks.Add(task);
                 context.SaveChanges();
 
-                return Ok(task);
+                return new CreatedAtRouteResult("GetById", new { id = task.id }, task);
             }
 
             return BadRequest(ModelState);
