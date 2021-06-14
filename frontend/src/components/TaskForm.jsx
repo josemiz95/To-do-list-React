@@ -16,6 +16,7 @@ export default function TaskForm({addTask}) {
                 // Return error
             }
             setDisabled(false);
+            document.querySelector('input[type="text"]').focus();
         }
     }
 
