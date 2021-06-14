@@ -21,13 +21,13 @@ namespace api.Controllers
             this.context = context; // Setting up the context
         }
 
-        [HttpGet]
+        [HttpGet] // RETURNING LIST OF TASKS
         public IEnumerable<Task> Get()
         {
             return context.Tasks.ToList(); // Getting list of task
         }
 
-        [HttpGet("{id}", Name = "GetById")]
+        [HttpGet("{id}", Name = "GetById")]  // RETURNING A TASK
         public IActionResult GetById(int id)
         {
             var task = context.Tasks.FirstOrDefault(Task => Task.id == id); // Find task by id
@@ -40,7 +40,7 @@ namespace api.Controllers
             return Ok(task);
         }
 
-        [HttpPost]
+        [HttpPost] // ADD TASK
         public IActionResult Post([FromBody] Task task)
         {
             var taskFind = context.Tasks.FirstOrDefault(t => t.id == task.id); // Find task by id to prevent duplicate key
@@ -56,7 +56,7 @@ namespace api.Controllers
             return BadRequest(ModelState);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id}")] // UPDATE TASK
         public IActionResult Put([FromBody] Task task, int id)
         {
             var taskFind = context.Tasks.FirstOrDefault(Task => Task.id == id); // Find task by id
@@ -77,7 +77,7 @@ namespace api.Controllers
             return BadRequest();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}")] // DELETE TASK
         public IActionResult Delete(int id)
         {
             var task = context.Tasks.FirstOrDefault(x => x.id == id); // Find task by id to delete
