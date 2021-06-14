@@ -14,3 +14,6 @@
 ## Explain briefly your technical design and why do you think is the best approach to this problem.
     The desing It's very simple, many components that control a part of the aplication.
     The main component (App), have the general functions that are going to be used for the other components, I think It's better to manage the main functions on the parent Components, then the child component, use them, this is how we can get a code easier to mantain, cleaner and reusable
+
+## IMPORTANT
+    On src/App.jsx have a constant (app_url) that contain the app url, is necesary to run the connections.
