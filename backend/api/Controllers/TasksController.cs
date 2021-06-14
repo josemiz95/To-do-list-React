@@ -68,10 +68,11 @@ namespace api.Controllers
 
             if (ModelState.IsValid && task.id == id)
             {
+                context.Entry(taskFind).State = EntityState.Detached;
                 context.Entry(task).State = EntityState.Modified; // Modify Task
                 context.SaveChanges();
 
-                return Ok();
+                return new CreatedAtRouteResult("GetById", new { id = task.id }, task);
             }
             return BadRequest();
         }

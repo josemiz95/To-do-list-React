@@ -1,13 +1,36 @@
-import React, {useState} from "react";
-import { v4 as uuid } from "uuid";
+import React, {useState, useEffect} from "react";
 // Components
 import List from "./components/List";
 import TaskForm from "./components/TaskForm";
 
+const app_url = "https://localhost:44396"; // App base url where is the api
 
 export default function App() {
   const [showingPending, setShowingPending] = useState(true); // True show pending task, False show completed task
   const [tasks, setTasks] = useState([ ]);
+
+  // At start
+  useEffect( () => {
+
+    async function getData(){ // Get data from server
+      const options = { // Petition options
+        method: 'GET',
+        headers: {'Content-Type':'application/json'}
+      }
+      
+      await fetch(app_url+'/api/tasks',options) // Petition
+        .then(response => response.json())
+        .then(data =>{ // Adding tasks to List
+  
+          setTasks(data);
+  
+        }).catch(data =>  false);
+  
+        return true;
+    }
+    getData();
+
+  }, [])
 
   const toggleTaskList = () => {
     setShowingPending(!showingPending); // Action for toggle list
@@ -17,19 +40,52 @@ export default function App() {
     return task.pending === showingPending;
   });
 
-  const addTask = (description) => { // Funtion to add task
-    setTasks((prevTasks)=>{
-      const newTask = {id:uuid(),description,pending:true}
-      return [...prevTasks, newTask];
-    })
+  const addTask = async (description) => { // Funtion to add task
+    const newTask = {description,pending:true}
+    
+    const options = { // Petition options
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(newTask)
+    }
+
+    await fetch(app_url+'/api/tasks',options) // Petition
+      .then(response => response.json())
+      .then(data =>{ // Adding task to List
+
+        setTasks((prevTasks)=>{
+          return [...prevTasks, data];
+        });
+      }).catch(data =>  false);
+
+      return true;
+    
   }
 
-  const toggleTask = (id) => { // Toggle pending task (True|False)
+  const toggleTask = async (id) => { 
+    // Toggle pending task (True|False)
     const updatedTask = [...tasks];
     const toggledTask = updatedTask.find((task)=> task.id === id );
     toggledTask.pending = !toggledTask.pending;
 
-    setTasks(updatedTask);
+    const options = { // Petition options
+      method: 'PUT',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(toggledTask)
+    }
+
+    await fetch(app_url+'/api/tasks/'+id,options) // Petition
+      .then(response => response.json())
+      .then(data =>{ // Toggle task
+
+        console.log(data);
+        setTasks(updatedTask);
+
+      }).catch(data => {
+        console.log(data)
+      });
+
+      return true;
   }
 
   return (
