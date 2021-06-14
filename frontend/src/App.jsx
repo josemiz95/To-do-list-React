@@ -9,6 +9,11 @@ export default function App() {
   const [showingPending, setShowingPending] = useState(true); // True show pending task, False show completed task
   const [tasks, setTasks] = useState([ ]);
 
+  /*
+  * Notes:
+  * On fetch functions when the petition return error, it's possible to show an error
+   */
+
   // At start
   useEffect( () => {
 
@@ -24,7 +29,7 @@ export default function App() {
   
           setTasks(data);
   
-        }).catch(data =>  false);
+        }).catch(data =>  false); // Error
   
         return true;
     }
@@ -36,9 +41,7 @@ export default function App() {
     setShowingPending(!showingPending); // Action for toggle list
   }
 
-  const list = tasks.filter((task)=>{ // List of showing tasks
-    return task.pending === showingPending;
-  });
+  const list = tasks.filter((task) => task.pending === showingPending ); // List of showing tasks
 
   const addTask = async (description) => { // Funtion to add task
     const newTask = {description,pending:true}
@@ -53,10 +56,9 @@ export default function App() {
       .then(response => response.json())
       .then(data =>{ // Adding task to List
 
-        setTasks((prevTasks)=>{
-          return [...prevTasks, data];
-        });
-      }).catch(data =>  false);
+        setTasks((prevTasks) =>  [...prevTasks, data] );
+
+      }).catch(data => false); // Error
 
       return true;
     
@@ -66,7 +68,7 @@ export default function App() {
     // Toggle pending task (True|False)
     const updatedTask = [...tasks];
     const toggledTask = updatedTask.find((task)=> task.id === id );
-    toggledTask.pending = !toggledTask.pending;
+    toggledTask.pending = !toggledTask.pending; // Toggle peding attribute
 
     const options = { // Petition options
       method: 'PUT',
@@ -78,12 +80,9 @@ export default function App() {
       .then(response => response.json())
       .then(data =>{ // Toggle task
 
-        console.log(data);
         setTasks(updatedTask);
 
-      }).catch(data => {
-        console.log(data)
-      });
+      }).catch(data => false); // Error
 
       return true;
   }

@@ -10,7 +10,7 @@ export default function TaskForm({addTask}) {
         const task = newTask.current.value;
         if(task.trim !== '' && !disabled){
             setDisabled(true);
-            if(await addTask(task)){
+            if(await addTask(task)){ // Adding task
                 newTask.current.value = null;
             } else {
                 // Return error
