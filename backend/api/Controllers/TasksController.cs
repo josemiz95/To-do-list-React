@@ -43,12 +43,20 @@ namespace api.Controllers
         [HttpPost] // ADD TASK
         public IActionResult Post([FromBody] Task task)
         {
-            var taskFind = context.Tasks.FirstOrDefault(t => t.id == task.id); // Find task by id to prevent duplicate key
 
-            if (ModelState.IsValid && taskFind == null)
+            if (ModelState.IsValid)
             {
+                task.id = 0; // Prevent id duplicated
                 context.Tasks.Add(task); // Add task to Database
-                context.SaveChanges();
+
+                try
+                {
+                    context.SaveChanges();
+                } 
+                catch (DbUpdateConcurrencyException)
+                {
+                    return StatusCode(500);
+                }
 
                 return new CreatedAtRouteResult("GetById", new { id = task.id }, task);
             }
@@ -59,21 +67,28 @@ namespace api.Controllers
         [HttpPut("{id}")] // UPDATE TASK
         public IActionResult Put([FromBody] Task task, int id)
         {
-            var taskFind = context.Tasks.FirstOrDefault(Task => Task.id == id); // Find task by id
 
-            if (taskFind == null)
+            if (!TaskExists(id))
             {
                 return NotFound();
             }
 
             if (ModelState.IsValid && task.id == id)
             {
-                context.Entry(taskFind).State = EntityState.Detached;
                 context.Entry(task).State = EntityState.Modified; // Modify Task
-                context.SaveChanges();
+
+                try
+                {
+                    context.SaveChanges();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    return StatusCode(500);
+                }
 
                 return new CreatedAtRouteResult("GetById", new { id = task.id }, task);
             }
+
             return BadRequest();
         }
 
@@ -88,9 +103,22 @@ namespace api.Controllers
             }
 
             context.Tasks.Remove(task); // Deleting from Database
-            context.SaveChanges();
+
+            try
+            {
+                context.SaveChanges();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return StatusCode(500);
+            }
 
             return Ok(task);
+        }
+
+        private bool TaskExists(int id)
+        {
+            return context.Tasks.Any(e => e.id == id);
         }
     }
 }

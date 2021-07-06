@@ -42,7 +42,7 @@ export default function App() {
   }
 
   const list = tasks.filter((task) => task.pending === showingPending ); // List of showing tasks
-
+  
   const addTask = async (description) => { // Funtion to add task
     const newTask = {description,pending:true}
     
@@ -61,7 +61,6 @@ export default function App() {
       }).catch(data => false); // Error
 
       return true;
-    
   }
 
   const toggleTask = async (id) => { 
