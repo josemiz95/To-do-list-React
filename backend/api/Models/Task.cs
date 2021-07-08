@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace api.Models
@@ -15,5 +16,7 @@ namespace api.Models
         public string description { get; set; }
         [Required(ErrorMessage = "Pending is required")]
         public bool pending { get; set; }
+        [JsonIgnore]
+        public DateTime? date { get; set; }
     }
 }

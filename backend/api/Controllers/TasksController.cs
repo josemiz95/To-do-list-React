@@ -47,6 +47,8 @@ namespace api.Controllers
             if (ModelState.IsValid)
             {
                 task.id = 0; // Prevent id duplicated
+                task.date = null; // Prevent date
+
                 context.Tasks.Add(task); // Add task to Database
 
                 try
@@ -75,6 +77,17 @@ namespace api.Controllers
 
             if (ModelState.IsValid && task.id == id)
             {
+                // task.date = !task.pending ? DateTime.Now : null;  For newer version
+
+                if (task.pending) // Set time stamp
+                {
+                    task.date = null;
+                }
+                else
+                {
+                    task.date = DateTime.Now;
+                }
+
                 context.Entry(task).State = EntityState.Modified; // Modify Task
 
                 try
