@@ -1,4 +1,5 @@
 using api.Models;
+using api.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -28,6 +29,8 @@ namespace api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddCors(); // Cors Access-Control-Allow-Origin
+
+            services.AddScoped<ITasks<Models.Task, int>, TaskRepository>();
             services.AddDbContext<ApplicationDbContext>(options => options.UseInMemoryDatabase("TasksDB")); // In memory database
             services.AddControllers();
         }

@@ -1,4 +1,5 @@
 ﻿using api.Models;
+using api.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,23 +15,23 @@ namespace api.Controllers
     [ApiController]
     public class TasksController : ControllerBase
     {
-        private readonly ApplicationDbContext context; // DB contex for manipulations
+        private readonly ITasks<Task, int> taskRepository; // DB contex for manipulations
 
-        public TasksController(ApplicationDbContext context)
+        public TasksController(ITasks<Task, int> taskRepository)
         {
-            this.context = context; // Setting up the context
+            this.taskRepository = taskRepository; // Setting up the context
         }
 
         [HttpGet] // RETURNING LIST OF TASKS
         public IEnumerable<Task> Get()
         {
-            return context.Tasks.ToList(); // Getting list of task
+            return taskRepository.GetAll(); // Getting list of task
         }
 
         [HttpGet("{id}", Name = "GetById")]  // RETURNING A TASK
         public IActionResult GetById(int id)
         {
-            var task = context.Tasks.FirstOrDefault(Task => Task.id == id); // Find task by id
+            var task = taskRepository.GetById(id); // Find task by id
 
             if (task == null)
             {
@@ -49,11 +50,11 @@ namespace api.Controllers
                 task.id = 0; // Prevent id duplicated
                 task.date = null; // Prevent date
 
-                context.Tasks.Add(task); // Add task to Database
+                taskRepository.Insert(task); // Add task to Database
 
                 try
                 {
-                    context.SaveChanges();
+                    taskRepository.Save();
                 } 
                 catch (DbUpdateConcurrencyException)
                 {
@@ -70,7 +71,7 @@ namespace api.Controllers
         public IActionResult Put([FromBody] Task task, int id)
         {
 
-            if (!TaskExists(id))
+            if (!taskRepository.Any(id))
             {
                 return NotFound();
             }
@@ -88,11 +89,11 @@ namespace api.Controllers
                     task.date = DateTime.Now;
                 }
 
-                context.Entry(task).State = EntityState.Modified; // Modify Task
+                taskRepository.Update(task); // Modify Task
 
                 try
                 {
-                    context.SaveChanges();
+                    taskRepository.Save();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -108,30 +109,7 @@ namespace api.Controllers
         [HttpDelete("{id}")] // DELETE TASK
         public IActionResult Delete(int id)
         {
-            var task = context.Tasks.FirstOrDefault(x => x.id == id); // Find task by id to delete
-
-            if (task == null)
-            {
-                return NotFound();
-            }
-
-            context.Tasks.Remove(task); // Deleting from Database
-
-            try
-            {
-                context.SaveChanges();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                return StatusCode(500);
-            }
-
-            return Ok(task);
-        }
-
-        private bool TaskExists(int id)
-        {
-            return context.Tasks.Any(e => e.id == id);
+            return StatusCode(500);
         }
     }
 }
