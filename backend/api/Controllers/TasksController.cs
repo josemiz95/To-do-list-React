@@ -49,6 +49,8 @@ namespace api.Controllers
 
                 return Ok(task);
 
+                // return task == null? NotFound() : Ok(task);  For newer version
+
             }
             catch
             {
@@ -67,8 +69,6 @@ namespace api.Controllers
                 try
                 {
                     taskRepository.Insert(task); // Add task to Database
-
-                    taskRepository.Save();
                 } 
                 catch
                 {
@@ -95,8 +95,6 @@ namespace api.Controllers
                     }
 
                     taskRepository.Update(task); // Modify Task
-
-                    taskRepository.Save(); // Saving changes
                 }
                 catch
                 {
@@ -122,8 +120,6 @@ namespace api.Controllers
                 var task = taskRepository.GetById(id);
 
                 taskRepository.Delete(task);
-
-                taskRepository.Save();
             } 
             catch
             {

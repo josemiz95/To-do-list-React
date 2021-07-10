@@ -27,6 +27,8 @@ namespace api.Repositories
         public Task Insert(Task entity)
         {
             context.Tasks.Add(entity);
+            context.SaveChanges();
+
             return entity;
         }
 
@@ -44,6 +46,7 @@ namespace api.Repositories
             }
 
             context.Entry(entity).State = EntityState.Modified; // Modify Task
+            context.SaveChanges();
 
             return entity;
         }
@@ -51,6 +54,7 @@ namespace api.Repositories
         public Boolean Delete(Task entity)
         {
             context.Tasks.Remove(entity);
+            context.SaveChanges();
 
             return true;
         }
