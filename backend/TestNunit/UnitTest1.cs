@@ -1,5 +1,7 @@
 using NUnit.Framework;
 using api.Models;
+using api.Repositories;
+using Moq;
 
 namespace TestNunit
 {
@@ -19,6 +21,8 @@ namespace TestNunit
                 description = "Descripcion de la tarea",
                 pending = true
             };
+
+            
 
             Assert.AreEqual(true, task.pending);
         }
