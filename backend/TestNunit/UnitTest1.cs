@@ -4,6 +4,8 @@ using api.Models;
 using api.Repositories;
 using api.Controllers;
 using Moq;
+using System;
+using System.Net;
 
 namespace TestNunit
 {
@@ -15,30 +17,103 @@ namespace TestNunit
         }
 
         [Test]
-        public void Test_Create_Task()
+        public void Test_Get_All_Task()
         {
-            
-            Mock<ITasks<Task, int>> taskRepo = new Mock<ITasks<Task, int>>();
+            // Testing getting an array of tasks
 
-            taskRepo.Setup(t => t.Insert( It.IsAny<Task>() )).Returns( (Task task) => { return task; } );
-
-            TasksController controller = new TasksController(taskRepo.Object);
-
-            Task testTask = new Task()
-            {
-                id = 1,
-                description = "Descripcion",
-                pending = true
+            Task[] testTasks = new Task[] { // Array of task
+                 new Task() { id = 1, description = "Descripcion", pending = true },
+                 new Task() { id = 2, description = "Descripcion 2", pending = false }
             };
 
-            var result = controller.Post(testTask);
+            //Moq
+            Mock<ITasks<Task, int>> taskRepo = new Mock<ITasks<Task, int>>();
+            taskRepo.Setup(t => t.GetAll()).Returns(testTasks);
 
-            IActionResult excepted = new CreatedAtRouteResult("GetById", new { id = testTask.id }, testTask);
+            TasksController controller = new TasksController(taskRepo.Object); // Controller
 
-            Assert.AreEqual(result, excepted);
+            var actionResult = controller.Get(); // Action to test
+            var result = actionResult as OkObjectResult;
+
+            // Testing
+            Assert.AreEqual(result.StatusCode, 200);
+            Assert.AreEqual(result.Value, testTasks);
+
+            taskRepo.Verify(t => t.GetAll());
+        }
+
+        [Test]
+        public void Test_Get_A_Task()
+        {
+            // Testing getting an array of tasks
+
+            Task testTask = new Task() { id = 1, description = "Descripcion", pending = true }; // Task
+
+            //Moq
+            Mock<ITasks<Task, int>> taskRepo = new Mock<ITasks<Task, int>>();
+            taskRepo.Setup(t => t.GetById( It.IsAny<int>() )).Returns((int id)=> { 
+                                                                            if(id == testTask.id) { return testTask; }
+                                                                            else { return null; }
+                                                                       });
+
+            TasksController controller = new TasksController(taskRepo.Object); // Controller
+
+            var actionResult = controller.GetById(1); // Action to test
+            var result = actionResult as OkObjectResult;
+
+            // Testing
+            Assert.AreEqual(result.StatusCode, 200);
+            Assert.AreEqual(result.Value, testTask);
+
+            taskRepo.Verify(t => t.GetById(1));
+        }
+
+        [Test]
+        public void Test_Get_A_Task_NotFound()
+        {
+            // Testing getting an array of tasks
+
+            Task testTask = new Task() { id = 1, description = "Descripcion", pending = true }; // Task
+
+            //Moq
+            Mock<ITasks<Task, int>> taskRepo = new Mock<ITasks<Task, int>>();
+            taskRepo.Setup(t => t.GetById(It.IsAny<int>())).Returns((int id) => {
+                if (id == testTask.id) { return testTask; }
+                else { return null; }
+            });
+
+            TasksController controller = new TasksController(taskRepo.Object); // Controller
+
+            var actionResult = controller.GetById(2); // Action to test
+            var result = actionResult as NotFoundResult;
+
+            // Testing
+            Assert.AreEqual(result.StatusCode, 404);
+
+            taskRepo.Verify(t => t.GetById(2));
+        }
+
+        [Test]
+        public void Test_Create_Task()
+        {
+            // Testing creating an complete task, with all data
+
+            Task testTask = new Task() { id = 1, description = "Descripcion", pending = true }; // Task
+
+            // Moq
+            Mock<ITasks<Task, int>> taskRepo = new Mock<ITasks<Task, int>>();
+            taskRepo.Setup(t => t.Insert(It.IsAny<Task>())).Returns((Task task) => { return task; });
+
+            TasksController controller = new TasksController(taskRepo.Object); // Controller
+
+            var actionResult = controller.Post(testTask); // Action to test
+            var result = actionResult as CreatedAtRouteResult;
+
+            // Testing
+            Assert.AreEqual(result.StatusCode, 201);
+            Assert.AreEqual(result.Value, testTask);
 
             taskRepo.Verify(t => t.Insert(testTask));
-
         }
     }
 }
