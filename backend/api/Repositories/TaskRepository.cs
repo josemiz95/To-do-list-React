@@ -32,6 +32,17 @@ namespace api.Repositories
 
         public Task Update(Task entity)
         {
+            // task.date = !task.pending? DateTime.Now : null;  For newer version
+
+            if (entity.pending) // Set time stamp
+            {
+                entity.date = null;
+            }
+            else
+            {
+                entity.date = DateTime.Now;
+            }
+
             context.Entry(entity).State = EntityState.Modified; // Modify Task
 
             return entity;

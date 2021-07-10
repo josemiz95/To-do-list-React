@@ -23,22 +23,38 @@ namespace api.Controllers
         }
 
         [HttpGet] // RETURNING LIST OF TASKS
-        public IEnumerable<Task> Get()
+        public IActionResult Get()
         {
-            return taskRepository.GetAll(); // Getting list of task
+            try
+            {
+                return Ok(taskRepository.GetAll()); // Getting list of task
+            }
+            catch
+            {
+                return StatusCode(500);
+            }
         }
 
         [HttpGet("{id}", Name = "GetById")]  // RETURNING A TASK
         public IActionResult GetById(int id)
         {
-            var task = taskRepository.GetById(id); // Find task by id
+            try {
 
-            if (task == null)
+                var task = taskRepository.GetById(id); // Find task by id
+
+                if (task == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(task);
+
+            }
+            catch
             {
-                return NotFound();
+                return StatusCode(500);
             }
 
-            return Ok(task);
         }
 
         [HttpPost] // ADD TASK
@@ -47,16 +63,14 @@ namespace api.Controllers
 
             if (ModelState.IsValid)
             {
-                task.id = 0; // Prevent id duplicated
-                task.date = null; // Prevent date
-
-                taskRepository.Insert(task); // Add task to Database
 
                 try
                 {
+                    taskRepository.Insert(task); // Add task to Database
+
                     taskRepository.Save();
                 } 
-                catch (DbUpdateConcurrencyException)
+                catch
                 {
                     return StatusCode(500);
                 }
@@ -71,31 +85,20 @@ namespace api.Controllers
         public IActionResult Put([FromBody] Task task, int id)
         {
 
-            if (!taskRepository.Any(id))
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid && task.id == id)
             {
-                // task.date = !task.pending ? DateTime.Now : null;  For newer version
-
-                if (task.pending) // Set time stamp
-                {
-                    task.date = null;
-                }
-                else
-                {
-                    task.date = DateTime.Now;
-                }
-
-                taskRepository.Update(task); // Modify Task
-
                 try
                 {
-                    taskRepository.Save();
+                    if (!taskRepository.Any(id)) // Exists?
+                    {
+                        return NotFound();
+                    }
+
+                    taskRepository.Update(task); // Modify Task
+
+                    taskRepository.Save(); // Saving changes
                 }
-                catch (DbUpdateConcurrencyException)
+                catch
                 {
                     return StatusCode(500);
                 }
@@ -109,7 +112,26 @@ namespace api.Controllers
         [HttpDelete("{id}")] // DELETE TASK
         public IActionResult Delete(int id)
         {
-            return StatusCode(500);
+            try
+            {
+                if (!taskRepository.Any(id)) // Exists?
+                {
+                    return NotFound();
+                }
+
+                var task = taskRepository.GetById(id);
+
+                taskRepository.Delete(task);
+
+                taskRepository.Save();
+            } 
+            catch
+            {
+                return StatusCode(500);
+            }
+
+            return Ok();
+
         }
     }
 }
