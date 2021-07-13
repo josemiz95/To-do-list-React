@@ -62,8 +62,7 @@ namespace api.Controllers
         [HttpPost] // ADD TASK
         public IActionResult Post([FromBody] Task task)
         {
-
-            if (ModelState.IsValid)
+            if (ModelState.IsValid && task != null)
             {
 
                 try
@@ -84,8 +83,7 @@ namespace api.Controllers
         [HttpPut("{id}")] // UPDATE TASK
         public IActionResult Put([FromBody] Task task, int id)
         {
-
-            if (ModelState.IsValid && task.id == id)
+            if (ModelState.IsValid && task != null && task.id == id)
             {
                 try
                 {
