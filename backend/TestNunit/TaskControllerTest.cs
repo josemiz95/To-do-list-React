@@ -8,10 +8,11 @@ using System;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 
 namespace TaskControllerTest
 {
-    public class Tests
+    public class TaskControllerTest
     {
         [SetUp]
         public void Setup()
@@ -325,8 +326,8 @@ namespace TaskControllerTest
                 controller.ModelState.AddModelError("Error", "Error task not valid");
             }
 
-
             return isValid;
         }
+
     }
 }
