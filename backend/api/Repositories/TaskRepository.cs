@@ -27,7 +27,7 @@ namespace api.Repositories
         public Task Insert(Task entity)
         {
             context.Tasks.Add(entity);
-            context.SaveChanges();
+            this.Save();
 
             return entity;
         }
@@ -36,17 +36,21 @@ namespace api.Repositories
         {
             // task.date = !task.pending? DateTime.Now : null;  For newer version
 
+            var old_task = this.GetById(entity.id);
+
             if (entity.pending) // Set time stamp
             {
                 entity.date = null;
             }
-            else
+            else if(old_task.date == null)
             {
                 entity.date = DateTime.Now;
             }
 
+            context.Entry(old_task).State = EntityState.Detached; // Detach
             context.Entry(entity).State = EntityState.Modified; // Modify Task
-            context.SaveChanges();
+
+            this.Save();
 
             return entity;
         }
@@ -54,7 +58,7 @@ namespace api.Repositories
         public Boolean Delete(Task entity)
         {
             context.Tasks.Remove(entity);
-            context.SaveChanges();
+            this.Save();
 
             return true;
         }

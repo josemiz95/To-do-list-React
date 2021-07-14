@@ -50,7 +50,6 @@ namespace api.Controllers
                 return Ok(task);
 
                 // return task == null? NotFound() : Ok(task);  For newer version
-
             }
             catch
             {
