@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Repository;
 using Repository.Repository;
 using Repository.Contracts;
+using API.Mappings;
 
 namespace API
 {
@@ -29,6 +30,8 @@ namespace API
                     Configuration.GetConnectionString("DefaultConnection"),
                     conection => conection.MigrationsAssembly("API"))
             );
+
+            services.AddAutoMapper(typeof(Maps));
 
             services.AddControllers();
         }
