@@ -6,16 +6,25 @@ using API.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
+using AutoMapper;
+using API.Mappings;
+using API.ViewModels;
 
 namespace UnitTests
 {
     public class TaskControllerTest
     {
         private Mock<ITaskRepository> taskRepo;
+        private IMapper mapper;
 
         public TaskControllerTest()
         {
             taskRepo = new Mock<ITaskRepository>();
+
+            var mapperProfile = new Maps();
+            var configurationMapper = new MapperConfiguration(cfg => cfg.AddProfile(mapperProfile));
+            mapper = new Mapper(configurationMapper);
+
         }
 
         public class TheGetMethod: TaskControllerTest
@@ -33,14 +42,13 @@ namespace UnitTests
                 //Moq
                 this.taskRepo.Setup(t => t.All()).Returns(testTasks);
 
-                TasksController controller = new TasksController(this.taskRepo.Object); // Controller
+                TasksController controller = new TasksController(this.taskRepo.Object, mapper); // Controller
 
                 var actionResult = controller.Get(); // Action to test
                 var result = actionResult as OkObjectResult;
 
                 // Assert
                 Assert.AreEqual(result.StatusCode, 200);
-                Assert.AreEqual(result.Value, testTasks);
 
                 this.taskRepo.Verify(t => t.All());
             }
@@ -62,14 +70,13 @@ namespace UnitTests
                     else { return null; }
                 });
 
-                TasksController controller = new TasksController(this.taskRepo.Object); // Controller
+                TasksController controller = new TasksController(this.taskRepo.Object, mapper); // Controller
 
                 var actionResult = controller.GetById(1); // Action to test
                 var result = actionResult as OkObjectResult;
 
                 // Assert
                 Assert.AreEqual(result.StatusCode, 200);
-                Assert.AreEqual(result.Value, testTask);
 
                 this.taskRepo.Verify(t => t.Find(1));
             }
@@ -87,7 +94,7 @@ namespace UnitTests
                     else { return null; }
                 });
 
-                TasksController controller = new TasksController(this.taskRepo.Object); // Controller
+                TasksController controller = new TasksController(this.taskRepo.Object, mapper); // Controller
 
                 var actionResult = controller.GetById(2); // Action to test
                 var result = actionResult as NotFoundResult;
@@ -106,12 +113,12 @@ namespace UnitTests
             {
                 // Testing creating an complete task, with all data
 
-                Task testTask = new Task() { description = "Descripcion" }; // Task
+                TaskVM testTask = new TaskVM() { description = "Descripcion" }; // Task
 
                 // Moq
-                this.taskRepo.Setup(t => t.Create(It.IsAny<Task>())).Returns((Task task) => { return true; });
+                this.taskRepo.Setup(t => t.Create(It.IsAny<Task>())).Returns((Task task) => { return task; });
 
-                TasksController controller = new TasksController(this.taskRepo.Object); // Controller
+                TasksController controller = new TasksController(this.taskRepo.Object, mapper); // Controller
 
                 var actionResult = controller.Post(testTask); // Action to test
                 var result = actionResult as CreatedAtRouteResult;
@@ -119,11 +126,8 @@ namespace UnitTests
 
                 // Assert
                 Assert.AreEqual(result.StatusCode, 201);
-                Assert.AreEqual(result.Value, testTask);
 
                 Assert.IsTrue(isValid);
-
-                this.taskRepo.Verify(t => t.Create(testTask));
             }
 
             [Test]
@@ -132,9 +136,9 @@ namespace UnitTests
                 // Testing creating a complete task, with all data
 
                 // Moq
-                this.taskRepo.Setup(t => t.Create(It.IsAny<Task>())).Returns((Task task) => { return true; });
+                this.taskRepo.Setup(t => t.Create(It.IsAny<Task>())).Returns((Task task) => { return task; });
 
-                TasksController controller = new TasksController(this.taskRepo.Object); // Controller
+                TasksController controller = new TasksController(this.taskRepo.Object, mapper); // Controller
 
                 var actionResult = controller.Post(null); // Action to test
                 var result = actionResult as BadRequestObjectResult;
@@ -148,11 +152,11 @@ namespace UnitTests
             {
                 // Testing creating a task, with uncomplete data
 
-                Task testTask = new Task() { description = "" }; // Task
+                TaskVM testTask = new TaskVM() { description = "" }; // Task
 
-                this.taskRepo.Setup(t => t.Create(It.IsAny<Task>())).Returns((Task task) => { return true; });
+                this.taskRepo.Setup(t => t.Create(It.IsAny<Task>())).Returns((Task task) => { return task; });
 
-                TasksController controller = new TasksController(this.taskRepo.Object);
+                TasksController controller = new TasksController(this.taskRepo.Object, mapper);
                 bool isValid = Validate(testTask, ref controller);
 
                 var actionResult = controller.Post(testTask);
@@ -181,11 +185,14 @@ namespace UnitTests
                     return true;
                 });
 
-                TasksController controller = new TasksController(this.taskRepo.Object); // Controller
+                TasksController controller = new TasksController(this.taskRepo.Object, mapper); // Controller
 
                 var actionResult = controller.Put(testUpdatedTask, testUpdatedTask.id); // Action to test
                 var result = actionResult as CreatedAtRouteResult;
-                bool isValid = Validate(testTask, ref controller);
+
+                var mappedTask = mapper.Map<Task, TaskVM>(testTask);
+
+                bool isValid = Validate(mappedTask, ref controller);
 
 
                 // Assert
@@ -211,7 +218,7 @@ namespace UnitTests
                     return false;
                 });
 
-                TasksController controller = new TasksController(this.taskRepo.Object); // Controller
+                TasksController controller = new TasksController(this.taskRepo.Object, mapper); // Controller
 
                 var actionResult = controller.Put(null, 1); // Action to test
                 var result = actionResult as BadRequestResult;
@@ -233,9 +240,10 @@ namespace UnitTests
                     return true;
                 });
 
-                TasksController controller = new TasksController(this.taskRepo.Object); // Controller
+                TasksController controller = new TasksController(this.taskRepo.Object, mapper); // Controller
 
-                bool isValid = Validate(testUpdatedTask, ref controller);
+                var mappedTask = mapper.Map<Task, TaskVM>(testUpdatedTask);
+                bool isValid = Validate(mappedTask, ref controller);
 
                 var actionResult = controller.Put(testUpdatedTask, testUpdatedTask.id); // Action to test
                 var result = actionResult as BadRequestResult;
@@ -259,7 +267,7 @@ namespace UnitTests
                     return true;
                 });
 
-                TasksController controller = new TasksController(this.taskRepo.Object); // Controller
+                TasksController controller = new TasksController(this.taskRepo.Object, mapper); // Controller
 
                 var actionResult = controller.Put(testUpdatedTask, 3); // Action to test
                 var result = actionResult as BadRequestResult;
@@ -282,11 +290,13 @@ namespace UnitTests
                     return true;
                 });
 
-                TasksController controller = new TasksController(this.taskRepo.Object); // Controller
+                TasksController controller = new TasksController(this.taskRepo.Object, mapper); // Controller
 
                 var actionResult = controller.Put(testUpdatedTask, testUpdatedTask.id); // Action to test
                 var result = actionResult as NotFoundResult;
-                bool isValid = Validate(testTask, ref controller);
+
+                var mappedTask = mapper.Map<Task, TaskVM>(testTask);
+                bool isValid = Validate(mappedTask, ref controller);
 
 
                 // Assert
@@ -323,7 +333,7 @@ namespace UnitTests
                     else { return false; }
                 });
 
-                TasksController controller = new TasksController(this.taskRepo.Object); // Controller
+                TasksController controller = new TasksController(this.taskRepo.Object, mapper); // Controller
 
                 var actionResult = controller.Delete(1); // Action to test
                 var result = actionResult as OkResult;
@@ -351,7 +361,7 @@ namespace UnitTests
                 });
 
 
-                TasksController controller = new TasksController(this.taskRepo.Object); // Controller
+                TasksController controller = new TasksController(this.taskRepo.Object, mapper); // Controller
 
                 var actionResult = controller.Delete(2); // Action to test
                 var result = actionResult as NotFoundResult;
@@ -363,7 +373,7 @@ namespace UnitTests
             }
         }
 
-        private bool Validate(Task task, ref TasksController controller)
+        private bool Validate(TaskVM task, ref TasksController controller)
         {
             // This function is because the unit test always pass ModelState.IsValid
 

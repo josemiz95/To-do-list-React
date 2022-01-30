@@ -12,5 +12,10 @@
 
         [Required(ErrorMessage = "Pending is required")]
         public bool pending { get; set; }
+
+        public TaskVM()
+        {
+            this.pending = true;
+        }
     }
 }
