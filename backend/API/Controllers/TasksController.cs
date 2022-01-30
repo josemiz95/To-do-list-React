@@ -1,6 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using API.ViewModels;
+using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Repository.Contracts;
 using Repository.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -10,11 +15,14 @@ namespace API.Controllers
     [ApiController]
     public class TasksController : ControllerBase
     {
-        private readonly ITaskRepository taskRepository; // DB contex for manipulations
+        private readonly ITaskRepository _taskRepository; // DB contex for manipulations
+        private readonly IMapper _mapper;
 
-        public TasksController(ITaskRepository taskRepository)
+
+        public TasksController(ITaskRepository taskRepository, IMapper mapper)
         {
-            this.taskRepository = taskRepository; // Setting up the context
+            this._taskRepository = taskRepository; // Setting up the context
+            this._mapper = mapper;
         }
 
         [HttpGet] // RETURNING LIST OF TASKS
@@ -22,9 +30,11 @@ namespace API.Controllers
         {
             try
             {
-                return Ok(taskRepository.All()); // Getting list of task
+                var tasksList = _taskRepository.All();
+                var model = this._mapper.Map<List<Task>, List<TaskVM>>(tasksList.ToList());
+                return Ok(model); // Getting list of task
             }
-            catch
+            catch (Exception ex)
             {
                 return StatusCode(500);
             }
@@ -36,16 +46,16 @@ namespace API.Controllers
             try
             {
 
-                var task = taskRepository.Find(id); // Find task by id
+                var task = _taskRepository.Find(id); // Find task by id
 
                 if (task == null)
                 {
                     return NotFound();
                 }
 
-                return Ok(task);
+                var model = this._mapper.Map<Task, TaskVM>(task);
 
-                // return task == null? NotFound() : Ok(task);  For newer version
+                return Ok(model);
             }
             catch
             {
@@ -55,21 +65,24 @@ namespace API.Controllers
         }
 
         [HttpPost] // ADD TASK
-        public IActionResult Post([FromBody] Task task)
+        public IActionResult Post([FromBody] TaskVM task)
         {
             if (ModelState.IsValid && task != null)
             {
-
                 try
                 {
-                    taskRepository.Create(task); // Add task to Database
+                    var model = this._mapper.Map<TaskVM, Task>(task);
+
+                    var createdTask = _taskRepository.Create(model); // Add task to Database
+
+                    var taskModel = this._mapper.Map<Task, TaskVM>(createdTask);
+
+                    return new CreatedAtRouteResult("GetById", new { id = taskModel.id }, taskModel);
                 }
                 catch
                 {
                     return StatusCode(500);
                 }
-
-                return new CreatedAtRouteResult("GetById", new { id = task.id }, task);
             }
 
             return BadRequest(ModelState);
@@ -82,12 +95,68 @@ namespace API.Controllers
             {
                 try
                 {
-                    if (!taskRepository.Exists(id)) // Exists?
+                    if (!_taskRepository.Exists(id)) // Exists?
                     {
                         return NotFound();
                     }
 
-                    taskRepository.Update(task); // Modify Task
+                    _taskRepository.Update(task); // Modify Task
+                }
+                catch
+                {
+                    return StatusCode(500);
+                }
+
+                return new CreatedAtRouteResult("GetById", new { id = task.id }, task);
+            }
+
+            return BadRequest();
+        }
+
+        [HttpPatch("{id}/done")] // UPDATE TASK
+        public IActionResult PatchDone([FromBody] Task task, int id)
+        {
+            if (ModelState.IsValid && task != null && task.id == id)
+            {
+                try
+                {
+                    if (!_taskRepository.Exists(id)) // Exists?
+                    {
+                        return NotFound();
+                    }
+
+                    task.pending = false;
+                    task.date = DateTime.Now;
+
+                    _taskRepository.Update(task); // Modify Task
+                }
+                catch
+                {
+                    return StatusCode(500);
+                }
+
+                return new CreatedAtRouteResult("GetById", new { id = task.id }, task);
+            }
+
+            return BadRequest();
+        }
+
+        [HttpPatch("{id}/pending")] // UPDATE TASK
+        public IActionResult PatchPending([FromBody] Task task, int id)
+        {
+            if (ModelState.IsValid && task != null && task.id == id)
+            {
+                try
+                {
+                    if (!_taskRepository.Exists(id)) // Exists?
+                    {
+                        return NotFound();
+                    }
+
+                    task.pending = true;
+                    task.date = null;
+
+                    _taskRepository.Update(task); // Modify Task
                 }
                 catch
                 {
@@ -105,14 +174,14 @@ namespace API.Controllers
         {
             try
             {
-                if (!taskRepository.Exists(id)) // Exists?
+                if (!_taskRepository.Exists(id)) // Exists?
                 {
                     return NotFound();
                 }
 
-                var task = taskRepository.Find(id);
+                var task = _taskRepository.Find(id);
 
-                taskRepository.Delete(task);
+                _taskRepository.Delete(task);
             }
             catch
             {

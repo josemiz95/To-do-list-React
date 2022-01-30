@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Repository.Models;
+using System.Collections.Generic;
 
 namespace Repository.Contracts
 {
@@ -6,7 +7,7 @@ namespace Repository.Contracts
     {
         IEnumerable<T> All();
         T Find(P id);
-        bool Create(T entity);
+        Task Create(T entity);
         bool Update(T entity);
         bool Delete(T entity);
         bool Exists(P id);

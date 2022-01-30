@@ -16,11 +16,12 @@
             return _Context.Tasks.ToList();
         }
 
-        public bool Create(Task entity)
+        public Task Create(Task entity)
         {
             _Context.Tasks.Add(entity);
-            
-            return this.Save();
+            this.Save();
+
+            return entity;
         }
 
         public bool Delete(Task entity)
