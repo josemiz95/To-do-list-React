@@ -64,7 +64,7 @@
         [HttpPost] // ADD TASK
         public IActionResult Post([FromBody] TaskVM task)
         {
-            if (!ModelState.IsValid && task == null && task.description == "")
+            if (!ModelState.IsValid || task == null || task.description == "")
             {
                 return BadRequest();
             }
@@ -88,7 +88,7 @@
         [HttpPut("{id}")] // UPDATE TASK
         public IActionResult Put([FromBody] TaskVM task, int id)
         {
-            if (!ModelState.IsValid && task == null && task.id != id && task.description == "")
+            if (!ModelState.IsValid || task == null || task.id != id || task.description == "")
             {
                 return BadRequest();
             }
