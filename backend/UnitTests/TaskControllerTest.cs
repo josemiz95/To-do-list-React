@@ -8,6 +8,8 @@
     using Xunit;
     using AutoFixture;
     using AutoFixture.AutoNSubstitute;
+    using AutoFixture.AutoMoq;
+    using Repository.Models;
 
     public class TaskControllerTest
     {
@@ -17,7 +19,7 @@
 
         public TaskControllerTest()
         {
-            _fixture = new Fixture().Customize(new AutoNSubstituteCustomization());
+            _fixture = new Fixture().Customize(new AutoMoqCustomization());
             _taskRepo = _fixture.Freeze<ITaskRepository>();
 
             var mapperProfile = new Maps();
@@ -52,6 +54,9 @@
             public void Test_Get_A_Task()
             {
                 //Arrange
+                var task = _fixture.Create<Task>();
+                TasksController controller = new TasksController(_taskRepo, mapper); // Controller
+                //_taskRepo.Setup();
 
                 //Act
 
